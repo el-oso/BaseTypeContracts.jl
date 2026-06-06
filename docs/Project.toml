@@ -1,0 +1,14 @@
+[deps]
+BaseTypeContracts = "d8b4e2f3-95c6-4e7a-8f1b-2c3d4e5f6a7b"
+Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+DocumenterVitepress = "4710194d-e776-4893-9690-8d956a29c365"
+TypeContracts = "c7a3f1e2-84b5-4d69-9e0a-1f2b3c4d5e6f"
+
+[compat]
+Documenter = "1"
+DocumenterVitepress = "0"
+julia = "1.11"
+
+[sources]
+BaseTypeContracts = {path = ".."}
+TypeContracts = {path = "../../TypeContracts"}
