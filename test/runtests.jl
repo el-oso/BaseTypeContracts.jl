@@ -2,6 +2,8 @@ using Test
 using TypeContracts
 using BaseTypeContracts
 using BaseTypeContracts: check, base_contract_types
+using JET: @test_opt
+import TrimCheck
 
 @testset "BaseTypeContracts.jl" begin
 
@@ -144,5 +146,7 @@ using BaseTypeContracts: check, base_contract_types
         @test occursin("Optional methods:", output)
         @test occursin("Behavioral invariants:", output)
     end
+
+    include("trim_compat.jl")
 
 end
