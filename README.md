@@ -78,8 +78,12 @@ test_behavior(String, Iterable, ["abc", ""]) # iterate returns nothing or a 2-tu
 
 ```julia
 interface_trait(AbstractArray, Vector{Int})  # Implemented{AbstractArray}()
-interface_trait(AbstractArray, Int)           # NotImplemented{AbstractArray}()
+interface_trait(AbstractArray, String)        # NotImplemented{AbstractArray}()
 ```
+
+(Note: numbers such as `Int` *do* satisfy the structural `AbstractArray` contract —
+`Base` defines `size`, `getindex` and `length` for scalars — so `String` is used
+here as a type that genuinely lacks the indexing methods.)
 
 ### Inspect a contract
 

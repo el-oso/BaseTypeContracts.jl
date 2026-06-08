@@ -14,8 +14,14 @@ using TypeContracts, BaseTypeContracts
 r = satisfies(Vector{Int}, AbstractArray)
 r.satisfied        # true
 
-satisfies(Int, AbstractArray).satisfied   # false — Int has no size/getindex
+satisfies(String, AbstractArray).satisfied   # false — String has no size/getindex
 ```
+
+!!! note
+    Scalar numbers such as `Int` and `Float64` *do* satisfy the structural
+    `AbstractArray` contract: `Base` defines `size`, `getindex` and `length` for
+    them. Use `test_behavior` (and the array-specific invariants) if you need to
+    distinguish a genuine array from a scalar that merely answers the same methods.
 
 To run every applicable Base contract for a type at once, use [`check`](@ref BaseTypeContracts.check). It
 matches with `<:`, so it works for parametric instantiations:
@@ -63,7 +69,7 @@ For dispatch on whether a type satisfies a contract, `interface_trait(B, T)` ret
 
 ```julia
 interface_trait(AbstractArray, Vector{Int})   # Implemented{AbstractArray}()
-interface_trait(AbstractArray, Int)            # NotImplemented{AbstractArray}()
+interface_trait(AbstractArray, String)         # NotImplemented{AbstractArray}()
 
 # Holy-trait pattern:
 flatten(x) = _flatten(interface_trait(AbstractArray, typeof(x)), x)
