@@ -72,7 +72,7 @@ function check(::Type{T}) where {T}
     for B in BASE_ABSTRACT_TYPES
         T <: B && (out[B] = satisfies(T, B))
     end
-    out
+    return out
 end
 
 """
@@ -171,22 +171,22 @@ function _register_invariants()
 
     @invariants AbstractArray begin
         "length equals prod(size)" => x -> length(x) == prod(size(x))
-        "eachindex covers length"  => x -> length(collect(eachindex(x))) == length(x)
+        "eachindex covers length" => x -> length(collect(eachindex(x))) == length(x)
     end
 
     @invariants AbstractDict begin
         "length equals number of keys" => x -> length(x) == length(keys(x))
-        "every key is present"         => x -> all(k -> haskey(x, k), keys(x))
+        "every key is present" => x -> all(k -> haskey(x, k), keys(x))
     end
 
     @invariants AbstractSet begin
-        "every element is a member"    => x -> all(e -> e in x, x)
-        "length equals element count"  => x -> length(x) == length(collect(x))
+        "every element is a member" => x -> all(e -> e in x, x)
+        "length equals element count" => x -> length(x) == length(collect(x))
     end
 
     @invariants Number begin
-        "zero is the additive identity"       => x -> x + zero(x) == x
-        "one is the multiplicative identity"  => x -> x * one(x) == x
+        "zero is the additive identity" => x -> x + zero(x) == x
+        "one is the multiplicative identity" => x -> x * one(x) == x
     end
 
     return nothing
