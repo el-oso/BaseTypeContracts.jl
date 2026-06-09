@@ -36,7 +36,8 @@ BaseTypeContracts.check(Vector{Int})         # all applicable base contracts
 """
 module BaseTypeContracts
 
-using TypeContracts
+using Reexport
+@reexport using TypeContracts
 
 export Iterable
 
