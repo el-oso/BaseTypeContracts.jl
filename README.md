@@ -1,6 +1,6 @@
 # BaseTypeContracts.jl
 
-Ready-made [TypeContracts.jl](https://github.com/el_oso/TypeContracts.jl) contracts
+Ready-made [TypeContracts.jl](https://github.com/el-oso/TypeContracts.jl) contracts
 for Julia's `Base` types — analogous to `BaseInterfaces.jl` for `Interfaces.jl`.
 
 Load the package and the core standard-library abstract types carry structural

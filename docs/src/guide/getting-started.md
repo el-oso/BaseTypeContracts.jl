@@ -2,7 +2,7 @@
 
 ## Installation
 
-BaseTypeContracts depends on [TypeContracts](https://github.com/el_oso/TypeContracts.jl).
+BaseTypeContracts depends on [TypeContracts](https://github.com/el-oso/TypeContracts.jl).
 Add both:
 
 ```julia

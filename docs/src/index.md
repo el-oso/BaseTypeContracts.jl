@@ -41,7 +41,7 @@ features:
 
 ## What is BaseTypeContracts.jl?
 
-BaseTypeContracts.jl is to [TypeContracts.jl](https://github.com/el_oso/TypeContracts.jl) what
+BaseTypeContracts.jl is to [TypeContracts.jl](https://github.com/el-oso/TypeContracts.jl) what
 `BaseInterfaces.jl` is to `Interfaces.jl`: a collection of pre-written contracts for
 Julia's `Base` abstract types. Load it, and the standard-library protocols are
 registered for you.

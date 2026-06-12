@@ -3,7 +3,7 @@
 BaseTypeContracts is intentionally small: loading it registers the Base contracts,
 and a couple of helpers let you query them. The full checking, testing and
 introspection toolkit lives in
-[TypeContracts](https://github.com/el_oso/TypeContracts.jl).
+[TypeContracts](https://github.com/el-oso/TypeContracts.jl).
 
 ## Module
 
