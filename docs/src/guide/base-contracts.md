@@ -12,6 +12,33 @@ describe(AbstractArray)        # mandatory + optional methods
 describe(Number, Val(:all))    # also lists behavioral invariants
 ```
 
+## In generated documentation
+
+TypeContracts integrates with Documenter.jl so contract information appears in your
+generated HTML docs. Two patterns are available:
+
+**Pattern A — inline `@eval` block** (zero config, inject anywhere in a page):
+
+````markdown
+```@eval
+using TypeContracts
+TypeContracts.contract_md_string(AbstractArray)
+```
+````
+
+**Pattern B — automatic `@docs` enhancement** (no per-page changes needed):
+
+When `using Documenter` appears in `docs/make.jl`, the `TypeContractsDocumenterExt`
+extension loads automatically and attaches the contract section to every registered
+type's `Base.Docs` entry. A standard `@docs AbstractArray` block then shows the
+contract inline.
+
+This page is generated with Pattern B: `using Documenter` in `make.jl` is all that
+was required.
+
+See the [TypeContracts documentation integration guide](https://el-oso.github.io/TypeContracts.jl/dev/guide/documentation)
+for full details.
+
 ## Quick reference
 
 | Type | Mandatory methods | Optional methods | Invariants |

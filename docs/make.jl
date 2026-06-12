@@ -1,5 +1,7 @@
 using Documenter, DocumenterVitepress
 using TypeContracts, BaseTypeContracts
+# TypeContractsDocumenterExt loads automatically with Documenter above and attaches
+# a contract section to every registered Base abstract type's @docs entry.
 
 makedocs(;
     modules = [BaseTypeContracts],
