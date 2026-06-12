@@ -1,7 +1,7 @@
 """
     BaseTypeContracts
 
-Ready-made [`TypeContracts`](https://github.com/el_oso/TypeContracts.jl) contracts
+Ready-made [`TypeContracts`](https://github.com/el-oso/TypeContracts.jl) contracts
 for Julia `Base` types — analogous to `BaseInterfaces.jl` for `Interfaces.jl`.
 
 Loading this package registers structural contracts and behavioral invariants for
@@ -27,11 +27,12 @@ with an explicit Base type:
 ```julia
 using TypeContracts, BaseTypeContracts
 
-satisfies(Vector{Int}, AbstractArray)        # (satisfied=true, ...)
-satisfies(Dict{String,Int}, AbstractDict)    # (satisfied=true, ...)
-satisfies(Vector{Int}, Iterable)             # iteration marker
+implements(Vector{Int}, AbstractArray)         # true
+implements(Dict{String,Int}, AbstractDict)     # true
+implements(Vector{Int}, Iterable)              # iteration marker
 
-BaseTypeContracts.check(Vector{Int})         # all applicable base contracts
+BaseTypeContracts.check(Vector{Int})           # all applicable base contracts
+BaseTypeContracts.all_implements(Vector{Int})  # true if all applicable contracts pass
 ```
 """
 module BaseTypeContracts
@@ -39,7 +40,7 @@ module BaseTypeContracts
 using Reexport
 @reexport using TypeContracts
 
-export Iterable
+export Iterable, all_implements
 
 # ── Iteration marker ──────────────────────────────────────────────────
 # Iteration has no `Base` abstract supertype, so we provide a marker type.
@@ -67,6 +68,9 @@ Returns a dict mapping each applicable Base type to its `satisfies` result.
 This is the `BaseTypeContracts` equivalent of `check_contract`, using `<:`
 matching so it works with parametric Base types (where the automatic supertype
 walk would miss the bare UnionAll registry key).
+
+For a simple boolean result use [`all_implements`](@ref), or for a single
+interface use `implements(T, AbstractArray)` etc.
 """
 function check(::Type{T}) where {T}
     out = Dict{Type, NamedTuple}()
@@ -75,6 +79,20 @@ function check(::Type{T}) where {T}
     end
     return out
 end
+
+"""
+    all_implements(T::Type) -> Bool
+
+Return `true` if `T` satisfies every applicable `Base` contract.
+Equivalent to `all(r -> r.satisfied, values(check(T)))`. Designed for
+direct use with `@test`:
+
+```julia
+@test all_implements(Vector{Int})
+@test all_implements(Dict{String, Int})
+```
+"""
+all_implements(T::Type) = all(r -> r.satisfied, values(check(T)))
 
 """
     base_contract_types() -> Tuple

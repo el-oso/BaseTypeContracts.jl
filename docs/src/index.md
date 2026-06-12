@@ -29,7 +29,7 @@ features:
     details: "The check helper matches via <: so it works with parametric Base types like Vector{Int} and Dict{String,Int}, where a bare-UnionAll registry key would otherwise be missed."
   - title: Built on TypeContracts
     icon: 🔗
-    details: "Everything is a normal TypeContracts contract — use satisfies, test_behavior, describe and interface_trait exactly as you would with your own contracts."
+    details: "Everything is a normal TypeContracts contract — use implements, behavior_passes, describe and interface_trait exactly as you would with your own contracts."
   - title: Behavioral invariants
     icon: ✅
     details: "Beyond method existence, invariants encode real laws: length == prod(size), one is the multiplicative identity, every dict key is present. Validate them with test_behavior."
@@ -49,11 +49,14 @@ registered for you.
 ```julia
 using TypeContracts, BaseTypeContracts
 
-satisfies(Vector{Int}, AbstractArray).satisfied      # true
-satisfies(Dict{String,Int}, AbstractDict).satisfied  # true
-satisfies(Int, Number).satisfied                     # true
+implements(Vector{Int}, AbstractArray)      # true
+implements(Dict{String,Int}, AbstractDict)  # true
+implements(Int, Number)                     # true
 
-# Every applicable Base contract for a type, at once:
+# Boolean check for all applicable Base contracts at once:
+all_implements(Vector{Int})   # true
+
+# Full diagnostic result:
 BaseTypeContracts.check(Vector{Int})
 # Dict(AbstractArray => (satisfied = true, …))
 ```

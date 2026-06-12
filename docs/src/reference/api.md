@@ -21,5 +21,6 @@ BaseTypeContracts.Iterable
 
 ```@docs
 BaseTypeContracts.check
+BaseTypeContracts.all_implements
 BaseTypeContracts.base_contract_types
 ```
