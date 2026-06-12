@@ -23,7 +23,7 @@ features:
     details: "Loading the package registers structural contracts and behavioral invariants for the core Base abstract types. No declarations to write yourself."
   - title: Covers the core protocols
     icon: 🧩
-    details: "AbstractArray (indexing), AbstractDict (associative), AbstractSet (set), AbstractString (string), Number (arithmetic), plus an Iterable marker for the iteration protocol."
+    details: "AbstractArray, AbstractDict, AbstractSet, AbstractString, Number, Real, AbstractFloat, Integer, AbstractChar, IO, AbstractChannel — plus an Iterable marker for the iteration protocol."
   - title: Subtype-aware checking
     icon: 🔎
     details: "The check helper matches via <: so it works with parametric Base types like Vector{Int} and Dict{String,Int}, where a bare-UnionAll registry key would otherwise be missed."
@@ -70,14 +70,20 @@ iteration protocol, operator methods) are written.
 
 ## Registered contracts
 
-| Contract target     | Protocol      | Example satisfying type |
-|---------------------|---------------|-------------------------|
-| `AbstractArray`     | indexing      | `Vector{Int}`           |
-| `AbstractDict`      | associative   | `Dict{String,Int}`      |
-| `AbstractSet`       | set           | `Set{Int}`              |
-| `AbstractString`    | string        | `String`                |
-| `Number`            | arithmetic    | `Int`, `Float64`        |
-| [`Iterable`](@ref)  | iteration     | queried explicitly      |
+| Contract target     | Protocol         | Example satisfying type |
+|---------------------|------------------|-------------------------|
+| `AbstractArray`     | indexing         | `Vector{Int}`           |
+| `AbstractDict`      | associative      | `Dict{String,Int}`      |
+| `AbstractSet`       | set              | `Set{Int}`              |
+| `AbstractString`    | string           | `String`                |
+| `Number`            | arithmetic       | `Int`, `Float64`        |
+| `Real`              | ordering         | `Float64`, `Int64`      |
+| `AbstractFloat`     | IEEE 754 laws    | `Float64`, `Float32`    |
+| `Integer`           | bitwise ops      | `Int64`, `UInt8`        |
+| `AbstractChar`      | code point       | `Char`                  |
+| `IO`                | byte I/O         | `IOBuffer`              |
+| `AbstractChannel`   | messaging        | `Channel{Int}`          |
+| [`Iterable`](@ref)  | iteration        | queried explicitly      |
 
 See [The Base Contracts](guide/base-contracts.md) for the exact method and invariant
 list behind each one.

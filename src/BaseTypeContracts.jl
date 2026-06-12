@@ -7,14 +7,20 @@ for Julia `Base` types — analogous to `BaseInterfaces.jl` for `Interfaces.jl`.
 Loading this package registers structural contracts and behavioral invariants for
 the core `Base` abstract types so you don't have to write them yourself:
 
-| Contract target      | Protocol      |
-|----------------------|---------------|
-| `AbstractArray`      | indexing      |
-| `AbstractDict`       | associative   |
-| `AbstractSet`        | set           |
-| `AbstractString`     | string        |
-| `Number`             | arithmetic    |
-| `Iterable` (marker)  | iteration     |
+| Contract target      | Protocol         |
+|----------------------|------------------|
+| `AbstractArray`      | indexing         |
+| `AbstractDict`       | associative      |
+| `AbstractSet`        | set              |
+| `AbstractString`     | string           |
+| `Number`             | arithmetic       |
+| `Real`               | ordering         |
+| `AbstractFloat`      | IEEE 754 laws    |
+| `Integer`            | bitwise ops      |
+| `AbstractChar`       | code point       |
+| `IO`                 | byte I/O         |
+| `AbstractChannel`    | messaging        |
+| `Iterable` (marker)  | iteration        |
 
 # Access pattern
 
@@ -57,7 +63,11 @@ abstract type Iterable end
 
 # ── Base abstract types carrying contracts ────────────────────────────
 
-const BASE_ABSTRACT_TYPES = (AbstractArray, AbstractDict, AbstractSet, AbstractString, Number)
+const BASE_ABSTRACT_TYPES = (
+    AbstractArray, AbstractDict, AbstractSet, AbstractString,
+    Number, Real, AbstractFloat, Integer,
+    AbstractChar, IO, AbstractChannel,
+)
 
 """
     check(T::Type) -> Dict{Type, NamedTuple}
@@ -103,10 +113,6 @@ Return the `Base` abstract types for which contracts are registered
 base_contract_types() = BASE_ABSTRACT_TYPES
 
 # ── Registration ──────────────────────────────────────────────────────
-# Contracts mutate `TypeContracts`' global registry. Cross-module mutation at
-# top level does not survive precompilation, so we register in `__init__`,
-# which runs on every load.
-
 
 # Only the one-arg `iterate` can be required structurally — the two-arg
 # form's state type is implementation-defined (e.g. `Int` for String),
@@ -198,6 +204,75 @@ end
     "zero is the additive identity" => x -> x + zero(x) == x
     "one is the multiplicative identity" => x -> x * one(x) == x
 end
+
+# Real: adds ordering on top of Number
+@contract Real begin
+    <(::Self, ::Self) :: Bool
+    rem(::Self, ::Self)
+    mod(::Self, ::Self)
+end
+
+@invariants Real begin
+    "< is irreflexive" => x -> !(x < x)
+end
+
+# AbstractFloat: no new mandatory methods beyond Real; only IEEE 754 invariants
+@invariants AbstractFloat begin
+    "NaN is not equal to itself" => x -> isnan(x) || x == x
+    "isfinite is consistent with isnan and isinf" => x -> isfinite(x) == (!isnan(x) && !isinf(x))
+end
+
+# Integer: adds bitwise operations on top of Real
+# &, |, ~ need the Base.:-qualified form — the Julia parser treats bare &(...) and
+# ~(...) as prefix-operator expressions, not function calls, causing @contract to fail.
+@contract Integer begin
+    Base.:&(::Self, ::Self)
+    Base.:(|)(::Self, ::Self)
+    xor(::Self, ::Self)
+    Base.:~(::Self)
+    div(::Self, ::Self)
+end
+
+@invariants Integer begin
+    "& is idempotent" => x -> (x & x) == x
+    "bitwise complement is an involution" => x -> ~(~x) == x
+end
+
+@contract AbstractChar begin
+    codepoint(::Self) :: Integer
+end
+
+@invariants AbstractChar begin
+    "codepoint is non-negative" => x -> codepoint(x) >= 0
+    "codepoint is in valid Unicode range" => x -> codepoint(x) <= 0x10FFFF
+end
+
+@contract IO begin
+    read(::Self, ::Type{UInt8}) :: UInt8
+    write(::Self, ::UInt8) :: Int
+    isopen(::Self) :: Bool
+    close(::Self)
+    :optional
+    flush(::Self)
+    eof(::Self) :: Bool
+    bytesavailable(::Self) :: Int
+end
+
+# No behavioral invariants for IO: read/write mutate state and may block,
+# making them unsafe to test against deepcopy'd objects.
+
+@contract AbstractChannel begin
+    put!(::Self, ::Any)
+    take!(::Self)
+    isopen(::Self) :: Bool
+    close(::Self)
+    :optional
+    isready(::Self) :: Bool
+    fetch(::Self)
+end
+
+# No behavioral invariants for AbstractChannel: put!/take! block on
+# empty/full channels, making safe predicate testing impractical.
 
 
 end # module BaseTypeContracts
