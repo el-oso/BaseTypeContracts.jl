@@ -1,6 +1,6 @@
 name = "BaseTypeContracts"
 uuid = "d8b4e2f3-95c6-4e7a-8f1b-2c3d4e5f6a7b"
-version = "0.5.1"
+version = "0.6.0"
 authors = ["el_oso"]
 
 [deps]
@@ -8,6 +8,6 @@ Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
 TypeContracts = "c7a3f1e2-84b5-4d69-9e0a-1f2b3c4d5e6f"
 
 [compat]
-TypeContracts = "0.12"
+TypeContracts = "0.13"
 Reexport = "1.2.2"
 julia = "1.9"

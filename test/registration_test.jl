@@ -7,7 +7,10 @@
     @testset "contracts registered for all base types" begin
         reg = registered_contracts()
         for B in base_contract_types()
-            @test haskey(reg, B)
+            # Most base types declare a `@contract` (appears in `registered_contracts`);
+            # invariants-only types (e.g. AbstractFloat: no new mandatory methods beyond
+            # Real, only IEEE 754 laws) appear via `list_behaviors` instead.
+            @test haskey(reg, B) || !isempty(list_behaviors(B))
         end
         @test haskey(reg, Iterable)
     end
