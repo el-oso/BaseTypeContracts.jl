@@ -1,4 +1,5 @@
 # BaseTypeContracts.jl
+[![CI](https://github.com/el-oso/BaseTypeContracts.jl/actions/workflows/CI.yml/badge.svg)](https://github.com/el-oso/BaseTypeContracts.jl/actions/workflows/CI.yml)
 [![](https://img.shields.io/badge/docs-dev-blue.svg)](https://el-oso.github.io/BaseTypeContracts.jl/dev/)
 Ready-made [TypeContracts.jl](https://github.com/el-oso/TypeContracts.jl) contracts
 for Julia's `Base` types — analogous to `BaseInterfaces.jl` for `Interfaces.jl`.
@@ -105,6 +106,10 @@ describe(Number, Val(:all))     # also lists behavioral invariants
 ## Documentation
 
 Full documentation is available at **https://el-oso.github.io/BaseTypeContracts.jl/dev/**.
+
+## Development note
+
+This package was developed with assistance from [Claude](https://claude.ai) (Anthropic). All code has been reviewed and is maintained by the author.
 
 ## License
 
