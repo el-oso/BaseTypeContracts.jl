@@ -1,5 +1,6 @@
 # BaseTypeContracts.jl
 [![CI](https://github.com/el-oso/BaseTypeContracts.jl/actions/workflows/CI.yml/badge.svg)](https://github.com/el-oso/BaseTypeContracts.jl/actions/workflows/CI.yml)
+[![Coverage](https://coveralls.io/repos/github/el-oso/BaseTypeContracts/badge.svg?branch=master)](https://coveralls.io/github/el-oso/BaseTypeContracts?branch=master)
 [![](https://img.shields.io/badge/docs-dev-blue.svg)](https://el-oso.github.io/BaseTypeContracts.jl/dev/)
 Ready-made [TypeContracts.jl](https://github.com/el-oso/TypeContracts.jl) contracts
 for Julia's `Base` types — analogous to `BaseInterfaces.jl` for `Interfaces.jl`.
