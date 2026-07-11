@@ -1,7 +1,10 @@
 # Checking Types
 
 Because the Base contracts are ordinary TypeContracts contracts, every TypeContracts
-tool works on them. This page covers the main patterns.
+tool works directly against a concrete instantiation like `Vector{Int}` — the
+registry key is the bare `AbstractArray` UnionAll, and TypeContracts resolves a
+parameterized concrete type back to it automatically. This page covers the main
+patterns.
 
 ## Boolean checks — `implements`
 
@@ -60,8 +63,9 @@ BaseTypeContracts.check(Float64)
 `Iterable` marker is excluded, since nothing is `<: Iterable`):
 
 ```julia
-base_contract_types()
-# (AbstractArray, AbstractDict, AbstractSet, AbstractString, Number)
+BaseTypeContracts.base_contract_types()
+# (AbstractArray, AbstractDict, AbstractSet, AbstractString, Number, Real,
+#  AbstractFloat, Integer, AbstractChar, IO, AbstractChannel)
 ```
 
 ## Behavioral testing — `behavior_passes` and `test_behavior`
@@ -102,6 +106,38 @@ flatten(x) = _flatten(interface_trait(AbstractArray, typeof(x)), x)
 _flatten(::Implemented{AbstractArray}, x) = vec(x)
 _flatten(::NotImplemented{AbstractArray}, x) = [x]
 ```
+
+## Sealing a stronger guarantee — `verified_trait`
+
+`interface_trait` checks method *existence* only — it never inspects return types.
+`verified_trait(B, T)` reflects the *full* check (existence and declared return
+types) once `T` has actually been verified via `@verify`, `@verify_all`, or
+`@delegate`. Unverified `(B, T)` pairs read as `NotImplemented{B}()`, even for a
+type that would satisfy the contract structurally — sealing is nominal and opt-in,
+not automatic:
+
+```julia
+verified_trait(AbstractArray, Vector{Int})   # NotImplemented{AbstractArray}() — not yet @verify'd
+
+@verify Vector{Int}                          # runs check_contract, then seals on success
+verified_trait(AbstractArray, Vector{Int})   # Implemented{AbstractArray}()
+```
+
+`@verify T` walks `T`'s entire supertype chain in one call, sealing every applicable
+contract at once:
+
+```julia
+@verify Int
+verified_trait(Number, Int)    # Implemented{Number}()
+verified_trait(Real, Int)      # Implemented{Real}()
+verified_trait(Integer, Int)   # Implemented{Integer}()
+```
+
+BaseTypeContracts itself does not pre-seal any Base type — which concrete
+instantiations matter is up to your code, and `@verify` is one call away wherever
+you already know the type. Like `interface_trait`, the sealed dispatch is
+`juliac --trim` safe and allocation-free (`@verify` runs `Base.return_types` only at
+module load / precompile time, never in the sealed method itself).
 
 ## Introspection — `describe`
 

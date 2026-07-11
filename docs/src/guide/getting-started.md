@@ -40,22 +40,19 @@ explains any failure.
 
 ## The `check` convenience
 
-To see every Base contract that applies to a type — matched by `<:`, so parametric
-types work — use [`check`](@ref BaseTypeContracts.check):
+`satisfies`, `implements`, `@verify`, and friends already work directly against a
+parametric concrete type like `Vector{Int}` — TypeContracts resolves it back to the
+registered `AbstractArray` UnionAll automatically, no special handling needed.
+
+[`check`](@ref BaseTypeContracts.check) is a further convenience on top of that: instead of naming one Base
+contract at a time, it returns *every* applicable one (matched by `<:` across the
+curated `Base` types this package covers) in a single `Dict`:
 
 ```julia
 BaseTypeContracts.check(Vector{Int})
 # Dict{Type, NamedTuple} with 1 entry:
 #   AbstractArray => (satisfied = true, …)
 ```
-
-## Why `<:` matching matters
-
-TypeContracts' automatic supertype walk keys the registry on concrete
-instantiations such as `AbstractArray{Int,1}`, but these contracts are registered on
-the bare `AbstractArray` UnionAll. Pass an explicit Base type to `satisfies` /
-`test_behavior`, or use [`check`](@ref BaseTypeContracts.check), which matches with `<:` and therefore finds
-the contract for `Vector{Int}`.
 
 ## Next steps
 

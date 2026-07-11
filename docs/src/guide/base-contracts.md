@@ -54,7 +54,14 @@ for full details.
 | `AbstractChar` | `codepoint :: Integer` | — | `0 ≤ codepoint ≤ 0x10FFFF` |
 | `IO` | `read(::UInt8)`, `write(::UInt8)`, `isopen`, `close` | `flush`, `eof`, `bytesavailable` | — |
 | `AbstractChannel` | `put!`, `take!`, `isopen`, `close` | `isready`, `fetch` | — |
-| `Iterable` *(marker)* | `iterate` | `length`, `eltype` | iterate returns `nothing` or 2-tuple |
+| `AbstractRange` | `first`, `last`, `step` | — | step matches consecutive elements; first/last bound the range |
+| `Base.AbstractLock` | `lock`, `unlock` | `trylock`, `islocked` | — |
+| `Logging.AbstractLogger` | `handle_message`, `shouldlog`, `min_enabled_level` | `catch_exceptions` | — |
+| `AbstractDisplay` | `display` | — | — |
+| `Base.AbstractPattern` | `occursin`, `findnext` | — | — |
+| `Exception` | — *(invariants only — structural check is vacuous)* | — | `showerror` produces a `String` |
+| `Random.AbstractRNG` | — *(invariants only — structural check is vacuous)* | — | equal states produce equal streams |
+| `Iterable` *(marker)* | `iterate` | `length` | iterate returns `nothing` or 2-tuple |
 
 Each level of the numeric hierarchy (`Number` → `Real` → `AbstractFloat`/`Integer`) adds only what is new at that level. Checking `Float64` covers `Number`, `Real`, and `AbstractFloat` contracts; checking `Int64` covers `Number`, `Real`, and `Integer`. The detailed sections below give the exact method signatures.
 
@@ -147,7 +154,8 @@ end
 
 Invariants:
 
-- `zero` is the additive identity: `x + zero(x) == x`
+- `zero` is the additive identity: `x + zero(x) == x` (NaN-safe and promotion-aware,
+  since `zero(x)`/`one(x)` can be narrower than `x`, e.g. `zero(π) isa Bool`)
 - `one` is the multiplicative identity: `x * one(x) == x`
 
 ## `Real` — ordering
@@ -240,6 +248,111 @@ end
 
 No behavioral invariants: `put!` and `take!` may block, making predicate testing impractical.
 
+## `AbstractRange` — stepped sequence
+
+```julia
+@contract AbstractRange begin
+    first(::Self)
+    last(::Self)
+    step(::Self)
+end
+```
+
+Invariants:
+
+- `step` is consistent with consecutive elements: `x[2] - x[1] == step(x)` (for ranges with 2+ elements)
+- `first` and `last` bound a nonempty range: both are members of the range
+
+## `Base.AbstractLock` — mutual exclusion
+
+`Base.AbstractLock` is public but unexported; import it explicitly
+(`import Base: AbstractLock`) before referencing it.
+
+```julia
+@contract AbstractLock begin
+    lock(::Self)
+    unlock(::Self)
+    :optional
+    trylock(::Self) :: Bool
+    islocked(::Self) :: Bool
+end
+```
+
+No behavioral invariants: `lock`/`unlock` have side effects and `lock` blocks,
+making predicate testing impractical.
+
+## `Logging.AbstractLogger` — log sink
+
+Requires the `Logging` stdlib. The level argument is typed `::LogLevel`, not `::Any`:
+`Base`'s own loggers (`ConsoleLogger`, `SimpleLogger`) declare `level::LogLevel` in
+`handle_message`/`shouldlog`, which is *more specific* than a `::Any` contract
+argument — an `::Any` contract would flag them as non-conforming even though they
+implement the protocol correctly.
+
+```julia
+@contract AbstractLogger begin
+    handle_message(::Self, ::LogLevel, ::Any, ::Any, ::Any, ::Any, ::Any, ::Any)
+    shouldlog(::Self, ::LogLevel, ::Any, ::Any, ::Any)
+    min_enabled_level(::Self)
+    :optional
+    catch_exceptions(::Self)
+end
+```
+
+No behavioral invariants: `handle_message` has I/O side effects.
+
+## `AbstractDisplay` — display sink
+
+```julia
+@contract AbstractDisplay begin
+    display(::Self, ::Any)
+end
+```
+
+No behavioral invariants: `display` has I/O side effects.
+
+## `Base.AbstractPattern` — text matching
+
+`Base.AbstractPattern` is public but unexported; import it explicitly
+(`import Base: AbstractPattern`) before referencing it.
+
+```julia
+@contract AbstractPattern begin
+    occursin(::Self, ::AbstractString)
+    findnext(::Self, ::AbstractString, ::Int)
+end
+```
+
+No behavioral invariants: match semantics are pattern-specific — there's no
+protocol-level law that holds for every implementer.
+
+## `Exception` — error reporting
+
+Structural-contract territory is vacuous here: `Base.showerror(io, ex)` has a
+generic fallback for any `::Any`, so `hasmethod` is always `true` regardless of
+whether a type actually implements anything meaningful. Registered as
+invariants-only, the same pattern used for `AbstractFloat`:
+
+```julia
+@invariants Exception begin
+    "showerror produces output" => x -> sprint(showerror, x) isa String
+end
+```
+
+## `Random.AbstractRNG` — random streams
+
+Also invariants-only: the real required methods (`rand(rng, ::SamplerTrivial{...})`)
+are sampler-machinery-specific and can't be expressed as a fixed `@contract`
+signature, and `rand`/`seed!` on the abstract type itself have generic fallbacks
+that would make a structural contract vacuous.
+
+```julia
+@invariants AbstractRNG begin
+    "equal states produce equal streams" =>
+        x -> rand(copy(x), UInt64) == rand(copy(x), UInt64)
+end
+```
+
 ## `Iterable` — the iteration marker
 
 Iteration has no `Base` abstract supertype, so BaseTypeContracts provides a marker
@@ -250,14 +363,14 @@ type, [`Iterable`](@ref). **No type is `<: Iterable`** — you query it explicit
     iterate(::Self)
     :optional
     length(::Self)
-    eltype(::Self)
 end
 ```
 
 Only the one-argument `iterate` is required structurally: the two-argument form's
 state type is implementation-defined (e.g. `Int` for `String`), so a fixed
 `iterate(::Self, ::Any)` signature would falsely fail. The behavioral invariant
-covers the full protocol instead:
+covers the full protocol instead. (`eltype` is not listed at all: `Base.eltype`
+has a generic fallback for any type, so it would always be reported as present.)
 
 - `iterate` returns `nothing` or a 2-tuple
 

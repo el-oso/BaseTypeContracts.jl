@@ -32,9 +32,15 @@ Calls `@contract` and `@invariants` at top level for each Base abstract type. Be
 
 `BASE_ABSTRACT_TYPES` is the canonical tuple of types covered by `check` and `all_implements`. Adding a new type means: add a `@contract` block, optionally an `@invariants` block, append to `BASE_ABSTRACT_TYPES`, update the table in `base-contracts.md`.
 
+TypeContracts' registry keys on the bare abstract-type UnionAll and resolves concrete parameterized instantiations back to it automatically — `implements`, `satisfies`, `check_contract`, `@verify`, and `verified_trait` all work directly against e.g. `Vector{Int}`, no special handling needed here. `check`/`all_implements` are convenience wrappers scoped to the curated `BASE_ABSTRACT_TYPES` list, not workarounds for a registry limitation.
+
 ### Operator names in `@contract`
 
 Operators `&`, `|`, `~` must use the `Base.:-qualified` form (`Base.:&(...)` etc.) in `@contract` blocks. The Julia parser treats bare `&(...)` and `~(...)` as prefix-operator expressions rather than function calls, causing the macro to fail. `+`, `-`, `*`, `<` do not have this problem.
+
+### `@contract` headers cannot be module-qualified
+
+`@contract Base.AbstractLock begin ... end` fails to parse — `_parse_contract_header` only accepts a bare symbol or `Symbol{T,...}`. Worse, forgetting to `import` first does **not** error: `@contract`'s auto-stub silently defines a *new local* abstract type with that name and registers the contract on it instead of the intended Base/stdlib type. Always `import Base: AbstractLock` (or the stdlib equivalent) before writing `@contract AbstractLock begin ... end`.
 
 ### `Iterable` marker
 

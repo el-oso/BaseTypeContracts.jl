@@ -30,6 +30,43 @@
         @test satisfies(Rational{Int}, Number).satisfied
     end
 
+    @testset "AbstractRange contract" begin
+        @test satisfies(UnitRange{Int}, AbstractRange).satisfied
+        @test satisfies(StepRange{Int, Int}, AbstractRange).satisfied
+        @test satisfies(Base.OneTo{Int}, AbstractRange).satisfied
+    end
+
+    @testset "Base.AbstractLock contract" begin
+        @test satisfies(ReentrantLock, Base.AbstractLock).satisfied
+        @test satisfies(Base.Threads.SpinLock, Base.AbstractLock).satisfied
+    end
+
+    @testset "Logging.AbstractLogger contract" begin
+        using Logging: AbstractLogger, ConsoleLogger, SimpleLogger, NullLogger
+        @test satisfies(ConsoleLogger, AbstractLogger).satisfied
+        @test satisfies(SimpleLogger, AbstractLogger).satisfied
+        @test satisfies(NullLogger, AbstractLogger).satisfied
+    end
+
+    @testset "AbstractDisplay contract" begin
+        @test satisfies(Base.TextDisplay, AbstractDisplay).satisfied
+    end
+
+    @testset "Base.AbstractPattern contract" begin
+        @test satisfies(Regex, Base.AbstractPattern).satisfied
+    end
+
+    @testset "Exception contract (structural, always satisfied)" begin
+        @test satisfies(ErrorException, Exception).satisfied
+        @test satisfies(ArgumentError, Exception).satisfied
+    end
+
+    @testset "Random.AbstractRNG contract (structural, always satisfied)" begin
+        using Random: AbstractRNG, MersenneTwister, Xoshiro
+        @test satisfies(MersenneTwister, AbstractRNG).satisfied
+        @test satisfies(Xoshiro, AbstractRNG).satisfied
+    end
+
     @testset "Iterable marker" begin
         @test satisfies(Vector{Int}, Iterable).satisfied
         @test satisfies(String, Iterable).satisfied
