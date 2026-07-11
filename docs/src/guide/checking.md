@@ -114,13 +114,18 @@ _flatten(::NotImplemented{AbstractArray}, x) = [x]
 types) once `T` has actually been verified via `@verify`, `@verify_all`, or
 `@delegate`. Unverified `(B, T)` pairs read as `NotImplemented{B}()`, even for a
 type that would satisfy the contract structurally — sealing is nominal and opt-in,
-not automatic:
+not automatic.
+
+**`@verify` is the only line you write.** `verified_trait` is never defined by
+hand — `@verify T` seals it in as a side effect, and `verified_trait` is purely a
+*call*, the same way `interface_trait` is called. It is not a second thing you
+maintain alongside `@verify`:
 
 ```julia
 verified_trait(AbstractArray, Vector{Int})   # NotImplemented{AbstractArray}() — not yet @verify'd
 
-@verify Vector{Int}                          # runs check_contract, then seals on success
-verified_trait(AbstractArray, Vector{Int})   # Implemented{AbstractArray}()
+@verify Vector{Int}                          # ← the only line you add
+verified_trait(AbstractArray, Vector{Int})   # Implemented{AbstractArray}() — now reads Implemented
 ```
 
 `@verify T` walks `T`'s entire supertype chain in one call, sealing every applicable
